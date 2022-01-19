@@ -43,7 +43,7 @@ class MyApp : Application() {
         startKoin {
             androidContext(this@MyApp)
             modules(listOf(myModule))
-            Log.i("hi", "testing for github learning purposes")
+            println("Adding this line for github learning purposes")
         }
     }
 }

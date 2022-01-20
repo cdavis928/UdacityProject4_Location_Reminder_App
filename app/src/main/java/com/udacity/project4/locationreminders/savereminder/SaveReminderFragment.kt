@@ -11,6 +11,7 @@ import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.Build.*
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
@@ -54,7 +55,7 @@ class SaveReminderFragment : BaseFragment() {
     private lateinit var reminderData: ReminderDataItem
 
     private val runningQOrLater =
-        android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q
+        VERSION.SDK_INT >= VERSION_CODES.Q
 
     private val geofencePendingIntent: PendingIntent by lazy {
         val intent = Intent(requireActivity(), GeofenceBroadcastReceiver::class.java)
@@ -62,18 +63,6 @@ class SaveReminderFragment : BaseFragment() {
         PendingIntent.getBroadcast(requireActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
-    // Per Udacity feedback, using RequestPermission contract
-    // in order to let the system manage permissions
-    val requestPermissionLauncher =
-        registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted: Boolean ->
-            if (isGranted) {
-                Log.i("Permission: ", "Granted")
-            } else {
-                Log.i("Permission: ", "Denied")
-            }
-        }
 
     // Per Udacity feedback, am implementing registerForActivityResult
     private val resultLauncher = registerForActivityResult(
@@ -100,7 +89,7 @@ class SaveReminderFragment : BaseFragment() {
         return binding.root
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
+    @RequiresApi(VERSION_CODES.Q)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.lifecycleOwner = this

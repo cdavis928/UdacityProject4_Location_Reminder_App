@@ -52,26 +52,10 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     private lateinit var map: GoogleMap
 
-
     // Some initializations suggested by the Google tutorial
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private var lastKnownLocation: Location? = null
     private val defaultLocation = LatLng(-33.8523341, 151.2106085)
-
-    // Per Udacity feedback, using RequestPermission contract
-    // in order to let the system manage permissions
-    val requestPermissionLauncher =
-        registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted: Boolean ->
-            if (isGranted) {
-                Log.i("Permission: ", "Granted")
-                //permission is granted. put code in here
-            } else {
-                Log.i("Permission: ", "Denied")
-                // tell user theyve denied a crucial permission
-            }
-        }
 
     companion object {
         private val TAG = SelectLocationFragment::class.java.simpleName
@@ -112,19 +96,10 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
-
         enableMyLocation()
-
         setMapStyle(map)
-
-        // Zooms into the user's location on the map.
-        // This does not work when the fragment is first created, but always works after. Why?
-        getDeviceLocation()
-
         setMapLongClick(map)
-
         setPoiClick(map)
-
     }
 
     private fun setMapStyle(map: GoogleMap) {
@@ -147,6 +122,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     // https://developers.google.com/maps/documentation/android-sdk/current-place-tutorial#get-the-location-of-the-android-device-and-position-the-map
     @SuppressLint("MissingPermission")
     private fun getDeviceLocation() {
+        Log.v(TAG, "getdevicelocation triggered")
         try {
             if (isPermissionGranted()) {
                 val locationResult = fusedLocationProviderClient.lastLocation
@@ -242,19 +218,20 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         ) === PackageManager.PERMISSION_GRANTED
     }
 
-
     // With help from https://knowledge.udacity.com/questions/450088
     @SuppressLint("MissingPermission")
     private fun enableMyLocation() {
-        Log.v(TAG, "enableMyLocation triggered")
         if (isPermissionGranted()) {
-            map.setMyLocationEnabled(true)
+            map.isMyLocationEnabled = true
+
+            // Fixed per Udacity review. Moving getDeviceLocation() here
+            // seems to have fixed the problem of map not zooming to user location
+            getDeviceLocation()
         } else {
             requestPermissions(
                 arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION),
                 SaveReminderFragment.REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE
             )
-
         }
     }
 

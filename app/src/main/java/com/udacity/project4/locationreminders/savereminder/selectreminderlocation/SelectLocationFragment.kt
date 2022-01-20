@@ -3,35 +3,26 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Intent
-import android.provider.Settings
-
-import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.content.res.Resources
-import android.graphics.Camera
 import android.location.Location
 import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.*
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
-import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.location.*
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.BuildConfig
 import com.udacity.project4.R
@@ -88,12 +79,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        requestForegroundPermission()
-
-    }
-
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         enableMyLocation()
@@ -122,7 +107,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     // https://developers.google.com/maps/documentation/android-sdk/current-place-tutorial#get-the-location-of-the-android-device-and-position-the-map
     @SuppressLint("MissingPermission")
     private fun getDeviceLocation() {
-        Log.v(TAG, "getdevicelocation triggered")
         try {
             if (isPermissionGranted()) {
                 val locationResult = fusedLocationProviderClient.lastLocation
@@ -212,8 +196,9 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     }
 
     private fun isPermissionGranted(): Boolean {
+        Log.v("resultTest", "isPermissionGranted triggered")
         return ContextCompat.checkSelfPermission(
-            requireContext(),
+            activity!!,
             Manifest.permission.ACCESS_FINE_LOCATION
         ) === PackageManager.PERMISSION_GRANTED
     }
@@ -235,31 +220,31 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         }
     }
 
-    private fun requestForegroundPermission() {
-        val permissionArray = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
-        val requestCode = SaveReminderFragment.REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE
-        requestPermissions(
-            permissionArray,
-            requestCode
-        )
-    }
-
+    // Per Udacity feedback, added actions for what happens when user Denies permissions
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-
-        Log.v("onRequestPermission: ", "function triggered")
-
-        if (requestCode == SaveReminderFragment.REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE) {
-            Log.v("onRequestPermission: ", "if1 triggered")
-            if (grantResults.size > 0 && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                enableMyLocation()
-                Log.v("onRequestPermission: ", "if2 triggered")
-            }
+        if (requestCode == SaveReminderFragment.REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE
+            && grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
+        ) {
+            enableMyLocation()
         } else {
-            // TODO: insert code for what happens when user denies request
+            if (isAdded) {
+                Snackbar.make(
+                    binding.root,
+                    R.string.permission_denied_explanation,
+                    Snackbar.LENGTH_INDEFINITE
+                )
+                    .setAction(R.string.settings) {
+                        startActivity(Intent().apply {
+                            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                            data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null)
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        })
+                    }.show()
+            }
         }
     }
 

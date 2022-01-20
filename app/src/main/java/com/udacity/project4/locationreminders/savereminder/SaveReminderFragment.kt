@@ -191,7 +191,6 @@ class SaveReminderFragment : BaseFragment() {
             } else {
                 true
             }
-        Log.v("permissions: ", "fg and bg location approved")
         return foregroundLocationApproved && backgroundPermissionApproved
     }
 

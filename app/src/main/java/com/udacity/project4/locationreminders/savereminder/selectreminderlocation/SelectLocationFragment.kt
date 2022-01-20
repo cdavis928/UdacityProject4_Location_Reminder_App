@@ -5,17 +5,24 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.provider.Settings
+
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Camera
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
@@ -26,15 +33,16 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.android.material.snackbar.Snackbar
+import com.udacity.project4.BuildConfig
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
+import com.udacity.project4.locationreminders.savereminder.SaveReminderFragment
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
 import java.util.*
-
 
 class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
@@ -43,12 +51,27 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     private lateinit var binding: FragmentSelectLocationBinding
 
     private lateinit var map: GoogleMap
-    private val REQUEST_LOCATION_PERMISSION = 1
+
 
     // Some initializations suggested by the Google tutorial
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private var lastKnownLocation: Location? = null
     private val defaultLocation = LatLng(-33.8523341, 151.2106085)
+
+    // Per Udacity feedback, using RequestPermission contract
+    // in order to let the system manage permissions
+    val requestPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                Log.i("Permission: ", "Granted")
+                //permission is granted. put code in here
+            } else {
+                Log.i("Permission: ", "Denied")
+                // tell user theyve denied a crucial permission
+            }
+        }
 
     companion object {
         private val TAG = SelectLocationFragment::class.java.simpleName
@@ -79,6 +102,12 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         binding.saveLocationButton.setOnClickListener { onLocationSelected() }
 
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        requestForegroundPermission()
+
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -213,20 +242,30 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         ) === PackageManager.PERMISSION_GRANTED
     }
 
+
     // With help from https://knowledge.udacity.com/questions/450088
     @SuppressLint("MissingPermission")
     private fun enableMyLocation() {
+        Log.v(TAG, "enableMyLocation triggered")
         if (isPermissionGranted()) {
             map.setMyLocationEnabled(true)
         } else {
-            ActivityCompat.requestPermissions(
-                requireActivity(),
+            requestPermissions(
                 arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION),
-                REQUEST_LOCATION_PERMISSION
+                SaveReminderFragment.REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE
             )
+
         }
     }
 
+    private fun requestForegroundPermission() {
+        val permissionArray = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        val requestCode = SaveReminderFragment.REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE
+        requestPermissions(
+            permissionArray,
+            requestCode
+        )
+    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -234,42 +273,18 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         grantResults: IntArray
     ) {
 
-        if (requestCode == REQUEST_LOCATION_PERMISSION) {
+        Log.v("onRequestPermission: ", "function triggered")
+
+        if (requestCode == SaveReminderFragment.REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE) {
+            Log.v("onRequestPermission: ", "if1 triggered")
             if (grantResults.size > 0 && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                 enableMyLocation()
+                Log.v("onRequestPermission: ", "if2 triggered")
             }
+        } else {
+            // TODO: insert code for what happens when user denies request
         }
     }
-
-//    private fun requestFinePermission() {
-//        when {
-//            ContextCompat.checkSelfPermission(
-//                requireContext(),
-//                Manifest.permission.ACCESS_FINE_LOCATION
-//            ) == PackageManager.PERMISSION_GRANTED -> {
-//                //Permission is granted
-//                Log.i("requestFinePermission: ", "granted")
-//            }
-//            ActivityCompat.shouldShowRequestPermissionRationale(
-//                requireActivity(),
-//                Manifest.permission.ACCESS_FINE_LOCATION
-//            ) -> {
-//
-//                Snackbar.make(
-//                    requireView(), "Permission required",
-//                    Snackbar.LENGTH_INDEFINITE
-//                ).show()
-//                // Additional rationale should be displayed
-//            }
-//            else -> {
-//                requestPermissionLauncher.launch(
-//                    Manifest.permission.ACCESS_FINE_LOCATION
-//                )
-//                Log.i("requestPermission: ", "requested")
-//                // Permission has not been asked yet
-//            }
-//        }
-//    }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.map_options, menu)

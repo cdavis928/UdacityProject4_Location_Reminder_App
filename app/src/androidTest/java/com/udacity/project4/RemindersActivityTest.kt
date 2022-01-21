@@ -32,22 +32,27 @@ import org.koin.dsl.module
 import org.koin.test.AutoCloseKoinTest
 import org.koin.test.get
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.replaceText
+import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.RootMatchers
 import androidx.test.espresso.matcher.ViewMatchers.isChecked
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
 import org.hamcrest.core.IsNot.not
-
+import org.koin.test.KoinTest
 
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 //END TO END test to black box test the app
 class RemindersActivityTest :
-    AutoCloseKoinTest() {// Extended Koin Test - embed autoclose @after method to close Koin after every test
+
+    // Help on KoinTest with thanks to https://knowledge.udacity.com/questions/666889
+
+    KoinTest {// Extended Koin Test - embed autoclose @after method to close Koin after every test
 
     private lateinit var repository: ReminderDataSource
     private lateinit var appContext: Application
@@ -99,16 +104,52 @@ class RemindersActivityTest :
 
     // Add End to End testing to the app
     @Test
-    fun saveReminder_showToast_Test(){
+    fun saveReminder_showToast_test() {
         val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
 
+        // nvaigate to SaveReminderFragment
         onView(withId(R.id.noDataTextView)).check(matches(isDisplayed()))
         onView(withId(R.id.addReminderFAB)).perform(click())
-        onView(withId(R.id.reminderTitle)).perform(replaceText("test"))
 
+        // Populate the text views within the SaveReminderFragment
+        onView(withId(R.id.reminderTitle)).perform(replaceText("title test"))
+        onView(withId(R.id.reminderDescription)).perform(replaceText("description test"))
+        // Move into SaveLocationFragment
+        onView(withId(R.id.selectLocation)).perform(click())
+        // Use long click to set a pin on the map
+        onView(withId(R.id.map)).perform(longClick())
+        onView(withId(R.id.save_location_button)).perform(click())
+
+        // return to SaveReminderFragment and click save to finalize
+        onView(withId(R.id.saveReminder)).perform(click())
+
+        // Check that the toast is displayed
+        onView(withText(R.string.reminder_saved)).inRoot(RootMatchers.withDecorView(not(remindersActivity.window.decorView)))
+            .check(matches(isDisplayed()))
 
         activityScenario.close()
     }
 
+    @Test
+    fun saveReminder_showSnackbar_test() {
+        val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
 
+        // navigate to SaveReminderFragment
+        onView(withId(R.id.noDataTextView)).check(matches(isDisplayed()))
+        onView(withId(R.id.addReminderFAB)).perform(click())
+
+        // Click the save button without any text in title or description
+        onView(withId(R.id.saveReminder)).perform(click())
+
+        // Verify snackbars from SaveReminderViewModel
+        onView(withId(R.id.snackbar_text)).check(matches(withText(R.string.err_enter_title)))
+        Thread.sleep(4000)
+
+        // Fill title field with text so we can test what happens when location is null
+        onView(withId(R.id.reminderTitle)).perform(replaceText("title text"))
+        onView(withId(R.id.saveReminder)).perform(click())
+        onView(withId(R.id.snackbar_text)).check(matches(withText(R.string.err_select_location)))
+
+        activityScenario.close()
+    }
 }

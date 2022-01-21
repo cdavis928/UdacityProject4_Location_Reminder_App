@@ -20,6 +20,8 @@ android {
 
         // adding to see if this fixes single dex file issue
         multiDexEnabled true
+        multiDexKeepProguard file('multidex-config.pro')
+
     }
     buildTypes {
         release {
@@ -64,7 +66,6 @@ dependencies {
     implementation 'androidx.fragment:fragment-ktx:1.4.0'
 
 
-
     // Architecture Components
     //Navigation dependencies
     implementation 'androidx.appcompat:appcompat:1.2.0'
@@ -76,7 +77,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$archLifecycleVersion"
     implementation "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
     implementation "androidx.navigation:navigation-ui-ktx:$navigationVersion"
-    implementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
+    implementation "androidx.test.espresso:espresso-idling-resource:3.4.0"
 
     //Room dependencies
     implementation "androidx.room:room-ktx:$roomVersion"
@@ -107,10 +108,12 @@ dependencies {
     testImplementation "androidx.test:rules:$androidXTestRulesVersion"
 
     // AndroidX Test - Instrumented testing
-    androidTestImplementation "androidx.test:core-ktx:$androidXTestCoreVersion"
-    androidTestImplementation "androidx.test.ext:junit-ktx:$androidXTestExtKotlinRunnerVersion"
+    androidTestImplementation "androidx.test:core-ktx:1.4.1-alpha03"
+    androidTestImplementation "androidx.test.ext:junit-ktx:1.1.3"
+    androidTestImplementation "androidx.test:runner:1.4.0"
+
     androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion"
-    androidTestImplementation "androidx.test:rules:$androidXTestRulesVersion"
+    androidTestImplementation "androidx.test:rules:1.4.0"
     androidTestImplementation "androidx.room:room-testing:$roomVersion"
     androidTestImplementation "androidx.arch.core:core-testing:$archTestingVersion"
     androidTestImplementation "org.robolectric:annotations:$robolectricVersion"
@@ -118,17 +121,15 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-contrib:3.4.0"
     androidTestImplementation "androidx.test.espresso:espresso-intents:3.4.0"
     androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:3.4.0"
+    androidTestImplementation "junit:junit:4.13.2"
 
-
-    androidTestImplementation "junit:junit:$junitVersion"
     // Once https://issuetracker.google.com/127986458 is fixed this can be testImplementation
-    implementation "androidx.fragment:fragment-testing:$fragmentVersion"
-    implementation "androidx.test:core:$androidXTestCoreVersion"
+    debugImplementation "androidx.fragment:fragment-testing:1.2.0"
+    implementation "androidx.test:core:1.4.1-alpha03"
     implementation "androidx.fragment:fragment:$fragmentVersion"
     androidTestImplementation "org.mockito:mockito-core:$mockitoVersion"
     androidTestImplementation "com.linkedin.dexmaker:dexmaker-mockito:$dexMakerVersion"
     androidTestImplementation('org.koin:koin-test:2.0.1') { exclude group: 'org.mockito' }
-
 
 
     //Maps & Geofencing

@@ -51,7 +51,6 @@ import org.koin.test.KoinTest
 class RemindersActivityTest :
 
     // Help on KoinTest with thanks to https://knowledge.udacity.com/questions/666889
-
     KoinTest {// Extended Koin Test - embed autoclose @after method to close Koin after every test
 
     private lateinit var repository: ReminderDataSource

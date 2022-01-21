@@ -5,15 +5,11 @@ import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.app.Activity.RESULT_OK
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
 import android.os.Build.*
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -23,16 +19,10 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
-import androidx.core.app.ActivityCompat.startIntentSenderForResult
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.snackbar.Snackbar
-import com.udacity.project4.BuildConfig
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
@@ -42,8 +32,6 @@ import com.udacity.project4.locationreminders.geofence.GeofenceTransitionsJobInt
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
-import java.lang.Exception
-import java.time.Duration
 
 class SaveReminderFragment : BaseFragment() {
     //Get the view model this time as a single to be shared with the another fragment
@@ -120,8 +108,6 @@ class SaveReminderFragment : BaseFragment() {
                 return@setOnClickListener
             }
             requestForegroundAndBackgroundLocationPermissions()
-            //TODO: button still gets interrupted at the end when displaying permission window
-
         }
     }
 

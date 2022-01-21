@@ -6,23 +6,12 @@
         <type value="RUNNING_DEVICE_TARGET" />
         <deviceKey>
           <Key>
-            <type value="VIRTUAL_DEVICE_PATH" />
-            <value value="C:\Users\chad\.android\avd\Nexus_5X_API_29.avd" />
+            <type value="SERIAL_NUMBER" />
+            <value value="RFCR80220ZY" />
           </Key>
         </deviceKey>
       </Target>
     </runningDeviceTargetSelectedWithDropDown>
-    <targetSelectedWithDropDown>
-      <Target>
-        <type value="QUICK_BOOT_TARGET" />
-        <deviceKey>
-          <Key>
-            <type value="VIRTUAL_DEVICE_PATH" />
-            <value value="C:\Users\chad\.android\avd\Nexus_5X_API_29.avd" />
-          </Key>
-        </deviceKey>
-      </Target>
-    </targetSelectedWithDropDown>
-    <timeTargetWasSelectedWithDropDown value="2022-01-21T05:08:56.604380800Z" />
+    <timeTargetWasSelectedWithDropDown value="2022-01-21T09:01:58.600051400Z" />
   </component>
 </project>
